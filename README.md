@@ -1,7 +1,8 @@
 # Case Agent
 
 **A records-investigation toolkit for newsrooms that use AI coding agents.**
-Built by a team at Arizona State University.
+Built by a team at Arizona State University. ·
+**Site:** https://ewyloge-asu.github.io/case-agent-for-newsrooms/
 
 Case Agent lets an AI agent do the slow parts of a records investigation — loading
 messy public records, connecting name variants to real people and companies, finding
@@ -45,19 +46,6 @@ Six [Agent Skills](https://agentskills.io) that work alone or as one pipeline:
 Install and first run: **[docs/getting-started.md](docs/getting-started.md)** —
 15 minutes to a first result on bundled demo data, then your own records.
 
-## Proof it works
-
-Two complete, real investigations ship in [`examples/`](examples/):
-
-- **[Federal lobbying money](examples/lobbying-money/)** — who lobbyist contributions
-  actually pool around (committee gatekeepers), a foreign-influence disclosure gap, and
-  $80M of unvetted claims sitting in the official record. Every number traces to a
-  filing; includes the case file, the legal memos, and the editor dashboard exactly as
-  the tools produced them.
-- **[Medicare hospital billing](examples/medicare-billing/)** — the same pipeline on a
-  completely different beat, from a blank question to a ranked, artifact-checked lead
-  list, with zero lobbying-specific code.
-
 ## The documentation
 
 | Doc | Read it when |
@@ -71,6 +59,8 @@ Two complete, real investigations ship in [`examples/`](examples/):
 ## Provenance & license
 
 Built by a team at ASU's Walter Cronkite School — Evan (analysis engine), Steve (data
-profiler & QA), Mitul (legal checker), Allie & Katie (case file), Shelby (footnoter) —
-originally for Northwestern's GAIN Agentic Investigation Challenge; this edition is
-maintained for working newsrooms. MIT license: use it, change it, ship it.
+profiler & QA), Mitul (legal checker), Allie & Katie (case file), Shelby (footnoter).
+The toolkit was developed and exercised on a complete federal-lobbying investigation
+and a second run on Medicare hospital billing data; those materials live with the
+original project, not in this repo. This edition is maintained for working newsrooms.
+MIT license: use it, change it, ship it.

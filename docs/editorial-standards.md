@@ -60,7 +60,7 @@ confirmed** (self-reported filings prove what was filed, not what happened), and
 
 ## Corrections
 
-When the tooling itself gets something wrong — and it has; see the amendment
-double-count corrected in the lobbying example — the fix goes into the *tool*, the
-corrected method is recorded in the case file, and the change is visible in version
-control. Same standard you'd hold a human methodology to.
+When the tooling itself gets something wrong — and it has: an amendment
+double-count once tripled an outlier's dollar figure before it was caught — the fix
+goes into the *tool*, the corrected method is recorded in the case file, and the
+change is visible in version control. Same standard you'd hold a human methodology to.

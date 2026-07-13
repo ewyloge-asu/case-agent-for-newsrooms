@@ -7,8 +7,8 @@ Where this is going, and how to bend it toward your beat today.
 The honest current state: the analysis engine is mature for money-in-politics records,
 and the *method* — scope, ingest, profile, find deviations, track, harden — is general.
 The scoping step already synthesizes a starter plan for any beat, the profiler takes
-any table, and the case file, legal checker, and footnoter are beat-agnostic. The
-Medicare example in `examples/medicare-billing/` shows the full loop on a foreign beat.
+any table, and the case file, legal checker, and footnoter are beat-agnostic. (We've exercised the
+full loop on two beats: federal lobbying records and Medicare hospital billing data.)
 
 What adapting to your beat looks like today: point the scoping step at your question,
 let the data-finder locate your sources, profile with `robodoig`, and express your

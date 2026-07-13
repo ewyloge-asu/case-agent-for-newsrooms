@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case Agent — a records-investigation toolkit for newsrooms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+ :root{
+   /* The Beam color system (ASU-blended) — maroon primary, turquoise secondary,
+      warm paper neutrals. Gold deliberately unused. */
+   --paper:#FFFFFF;--paper2:#F6F5F1;--ink:#191919;--ink2:#484848;--mut:#747474;
+   --line:#E8E8E8;--line2:#D0D0D0;
+   --maroon:#8C1D40;--maroon-deep:#611A2E;--maroon-tint:#F8F4F4;
+   --teal:#007D88;--teal-deep:#005B64;--teal-tint:#F1F6F7;
+   --ok-bg:#D7F5D7;--ok:#005F14;--warn-bg:#FFE6D5;--warn:#773A00;
+   --err-bg:#FFE4DF;--err:#892312;--info-bg:#D1F1FF;--info:#00566E;
+   /* American-broadsheet pairing: Franklin Gothic voice for display,
+      a print-grade serif for reading, Plex Mono for the machine layer. */
+   --sans:'Libre Franklin',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+   --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+   --disp:'Libre Franklin',-apple-system,'Segoe UI',Roboto,sans-serif;
+   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+ }
+ *{box-sizing:border-box;} html{scroll-behavior:smooth;}
+ body{margin:0;font:16.5px/1.7 var(--serif);background:var(--paper);color:var(--ink);
+      -webkit-font-smoothing:antialiased;}
+ ::selection{background:#FEC7CF;}
+ /* links: understated grow-in underline */
+ a{color:var(--maroon);text-decoration:none;
+   background-image:linear-gradient(currentColor,currentColor);
+   background-repeat:no-repeat;background-position:0 100%;background-size:0% 1.5px;
+   transition:background-size .25s ease;}
+ a:hover{background-size:100% 1.5px;}
+ .dl,.navlinks a,.tag a{background-image:none;}
+ .wrap{max-width:1000px;margin:0 auto;padding:0 24px;}
+ [id]{scroll-margin-top:64px;}
+ @media (prefers-reduced-motion:reduce){
+   *,*::before,*::after{animation:none!important;transition:none!important;}
+ }
+
+ /* ---------- nav + hamburger ---------- */
+ nav{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+     border-bottom:1px solid var(--line);z-index:20;}
+ nav .wrap{display:flex;align-items:center;gap:4px;padding:10px 24px;}
+ .brand{font:700 15px/1 var(--disp);color:var(--ink);margin-right:auto;white-space:nowrap;}
+ .brand b{color:var(--maroon);}
+ .navlinks{display:flex;gap:2px;flex-wrap:wrap;}
+ .navlinks a{font:500 12px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;
+       color:var(--ink2);padding:9px 11px;border-radius:8px;}
+ .navlinks a:hover{color:var(--maroon);background:var(--maroon-tint);text-decoration:none;}
+ .burger{display:none;background:none;border:1px solid var(--line2);border-radius:8px;
+       padding:8px 10px;cursor:pointer;}
+ .burger span{display:block;width:18px;height:2px;background:var(--ink);margin:3.5px 0;
+       transition:.2s;}
+ @media (max-width:780px){
+   .burger{display:block;}
+   .navlinks{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;
+       border-bottom:1px solid var(--line);flex-direction:column;padding:8px 16px 14px;
+       box-shadow:0 16px 30px -18px rgba(25,25,25,.25);}
+   nav.open .navlinks{display:flex;}
+   nav.open .burger span:nth-child(1){transform:translateY(5.5px) rotate(45deg);}
+   nav.open .burger span:nth-child(2){opacity:0;}
+   nav.open .burger span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);}
+   .navlinks a{padding:12px;border-bottom:1px solid var(--paper2);font-size:13px;}
+ }
+
+ /* ---------- hero (with barely-perceptible parallax layer) ---------- */
+ header{position:relative;background:linear-gradient(180deg,var(--paper2),var(--paper));
+        border-bottom:1px solid var(--line);padding:84px 0 64px;overflow:hidden;}
+ .parallax{position:absolute;inset:-12% -4%;pointer-events:none;will-change:transform;
+   background:
+     radial-gradient(560px 300px at 10% 0%,rgba(140,29,64,.05),transparent 65%),
+     radial-gradient(640px 340px at 92% 8%,rgba(0,125,136,.06),transparent 65%);}
+ .watermark{position:absolute;right:-40px;bottom:-54px;pointer-events:none;
+   font:italic 600 190px/1 var(--serif);color:rgba(140,29,64,.045);
+   user-select:none;will-change:transform;white-space:nowrap;}
+ header .wrap{position:relative;}
+ .tag{font:600 11.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+      color:var(--teal-deep);display:inline-block;padding:8px 14px;
+      border:1px solid var(--line2);border-radius:99px;background:#fff;}
+ .tag a{color:inherit;}
+ h1{font-family:var(--disp);font-weight:800;font-size:clamp(46px,7.5vw,76px);
+    letter-spacing:-.015em;line-height:1.02;margin:24px 0 6px;}
+ h1 em{font-family:var(--serif);font-style:italic;font-weight:600;color:var(--maroon);}
+ .kicker{font-family:var(--serif);font-style:italic;font-size:19px;color:var(--ink2);margin:0 0 18px;}
+ .sub{color:var(--ink2);font-size:18.5px;max-width:740px;}
+ .stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px;}
+ /* stat chips step through the maroon sequential ramp (light -> deep) */
+ .stat{background:#fff;border:1px solid var(--line);border-radius:10px;
+       padding:12px 18px;min-width:150px;flex:1;max-width:230px;}
+ .stat:nth-child(1){border-top:3px solid #E8758E;}
+ .stat:nth-child(2){border-top:3px solid #CE5371;}
+ .stat:nth-child(3){border-top:3px solid #AF3758;}
+ .stat:nth-child(4){border-top:3px solid #8A2341;}
+ .stat b{display:block;font:600 24px/1.2 var(--disp);color:var(--ink);}
+ .stat span{font:500 11px/1.5 var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--mut);}
+
+ /* ---------- sections ---------- */
+ section{padding:64px 0;border-bottom:1px solid var(--line);}
+ section:nth-of-type(even){background:var(--paper2);}
+ .eyebrow{font:600 11.5px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;
+          color:var(--teal-deep);margin:0 0 12px;}
+ .eyebrow::before{content:"";display:inline-block;width:22px;height:2px;background:var(--maroon);
+          vertical-align:middle;margin-right:10px;}
+ h2{font-family:var(--disp);font-weight:700;font-size:clamp(28px,3.6vw,38px);
+    letter-spacing:-.01em;margin:0 0 18px;}
+ h3{font-family:var(--disp);font-weight:600;margin:6px 0;font-size:20px;}
+
+ /* ---------- flow + cards ---------- */
+ .flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin:22px 0;}
+ .step{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 16px 14px;}
+ .step b{font-family:var(--disp);font-size:17px;color:var(--maroon);display:block;margin-bottom:6px;}
+ .step small{color:var(--ink2);}
+ /* the four workflow steps walk the maroon sequential ramp; generality steps walk teal */
+ #what .flip:nth-child(1) .face{border-left:3px solid #E8758E;}
+ #what .flip:nth-child(2) .face{border-left:3px solid #CE5371;}
+ #what .flip:nth-child(3) .face{border-left:3px solid #AF3758;}
+ #what .flip:nth-child(4) .face{border-left:3px solid #8A2341;}
+ #generality .step:nth-child(1){border-left:3px solid #4FCFDE;}
+ #generality .step:nth-child(2){border-left:3px solid #00B3C3;}
+ #generality .step:nth-child(3){border-left:3px solid #0095A2;}
+ #generality .step:nth-child(4){border-left:3px solid #005B64;}
+ .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;}
+ .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;
+       transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+       display:flex;flex-direction:column;}
+ .card:hover{border-color:var(--maroon);box-shadow:0 12px 28px -18px rgba(140,29,64,.35);
+       transform:translateY(-2px);}
+ .card h3{margin:0 0 2px;font-size:21px;}
+ .card .id{font:500 12px/1.6 var(--mono);color:var(--mut);margin:0 0 10px;}
+ .card p{margin:0 0 8px;color:var(--ink2);font-size:15px;}
+ .card .dl{margin-top:auto;align-self:flex-start;}
+
+ /* ---------- flip cards (click for details) ---------- */
+ .flip{perspective:1200px;cursor:pointer;}
+ .flip .inner{display:grid;transform-style:preserve-3d;
+       transition:transform .55s cubic-bezier(.4,.1,.2,1);height:100%;}
+ .flip.flipped .inner{transform:rotateY(180deg);}
+ .flip .face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+       background:#fff;border:1px solid var(--line);border-radius:12px;
+       padding:16px 16px 14px;display:flex;flex-direction:column;
+       transition:box-shadow .22s ease,border-color .22s ease;}
+ .flip .face.back{transform:rotateY(180deg);background:var(--paper2);}
+ .flip:hover .face{border-color:var(--maroon);box-shadow:0 12px 28px -18px rgba(140,29,64,.3);}
+ .flip{transition:transform .22s ease;}
+ .flip:hover{transform:translateY(-2px);}
+ .flip.flipped{transform:scale(1.02);}
+ .flip .face b{font-family:var(--disp);font-size:17px;color:var(--maroon);display:block;margin-bottom:6px;}
+ .flip .face small{color:var(--ink2);}
+ .flip .hint{margin-top:auto;padding-top:10px;font:500 10.5px/1 var(--mono);
+       letter-spacing:.08em;text-transform:uppercase;color:var(--line2);
+       transition:color .22s ease;}
+ .flip:hover .hint{color:var(--maroon);}
+ .flip .back ul{margin:2px 0 8px;padding-left:16px;color:var(--ink2);font-size:13px;line-height:1.55;}
+ .flip .back li{margin:4px 0;}
+ /* skill cards as flip cards keep card sizing */
+ .grid .flip .face{padding:20px;}
+ .grid .flip .face h3{margin:0 0 2px;font-size:21px;}
+ .grid .flip .face .id{font:500 12px/1.6 var(--mono);color:var(--mut);margin:0 0 10px;}
+ .grid .flip .face p{margin:0 0 8px;color:var(--ink2);font-size:15px;}
+ .grid .flip .face .dl{margin-top:auto;align-self:flex-start;}
+
+ /* bundle chooser */
+ .bundles{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin:8px 0 30px;}
+ .bundle{background:#fff;border:2px solid var(--line2);border-radius:14px;padding:22px;
+       transition:transform .22s ease,box-shadow .22s ease;}
+ .bundle:hover{transform:translateY(-2px);box-shadow:0 14px 30px -20px rgba(25,25,25,.35);}
+ .bundle.primary{border-color:var(--maroon);}
+ .bundle h3{font-size:22px;margin-top:0;}
+ .bundle .id{font:500 12px/1.6 var(--mono);color:var(--mut);}
+ .bundle ul{margin:10px 0 6px;padding-left:20px;color:var(--ink2);font-size:15px;}
+ .bundle li{margin:4px 0;}
+
+ /* ---------- pills + tables ---------- */
+ .pill{display:inline-block;font:600 11.5px/1 var(--mono);letter-spacing:.02em;
+       padding:5px 11px;border-radius:99px;white-space:nowrap;}
+ .c-good{background:var(--ok-bg);color:var(--ok);}
+ .c-warn{background:var(--info-bg);color:var(--info);}
+ .c-flag{background:var(--err-bg);color:var(--err);}
+ .c-mut{background:var(--line);color:var(--ink2);}
+ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14.5px;font-family:var(--sans);background:#fff;
+       border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+ th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+ tr:last-child td{border-bottom:none;}
+ th{font:600 11px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--mut);background:var(--paper2);}
+ tr:hover td{background:var(--maroon-tint);}
+
+ /* ---------- code, buttons, accordions ---------- */
+ code{font-family:var(--mono);background:var(--paper2);border:1px solid var(--line);
+      padding:2px 7px;border-radius:6px;font-size:13px;}
+ pre{font-family:var(--mono);background:var(--ink);color:#F2F0EC;border-radius:12px;
+     padding:18px;overflow:auto;font-size:13px;line-height:1.7;}
+ pre .cm{color:#B7A276;}
+ .dl{display:inline-block;font:600 13.5px/1 var(--sans);color:#fff;padding:11px 18px;
+     border-radius:9px;margin-top:12px;background:var(--maroon);transition:.18s;}
+ .dl:hover{text-decoration:none;background:var(--maroon-deep);transform:translateY(-1px);}
+ .dl.alt{background:#fff;color:var(--maroon);border:1.5px solid var(--maroon);}
+ .dl.alt:hover{background:var(--maroon-tint);}
+ details.acc{background:#fff;border:1px solid var(--line);border-radius:12px;
+     margin:10px 0;overflow:hidden;transition:border-color .22s ease,box-shadow .22s ease;}
+ details.acc:hover{border-color:var(--maroon);box-shadow:0 8px 22px -18px rgba(140,29,64,.35);}
+ details.acc>summary{cursor:pointer;list-style:none;padding:15px 18px;
+     font:600 15.5px/1.4 var(--sans);display:flex;align-items:center;gap:10px;
+     transition:background .22s ease;}
+ details.acc>summary:hover{background:var(--maroon-tint);}
+ details.acc>summary::-webkit-details-marker{display:none;}
+ details.acc>summary::before{content:"+";font:600 18px/1 var(--mono);color:var(--maroon);
+     width:18px;transition:transform .3s ease;}
+ details.acc[open]>summary::before{content:"+";transform:rotate(45deg);}
+ details.acc[open]>summary{border-bottom:1px solid var(--line);}
+ details.acc .body{padding:6px 18px 18px;}
+ details.acc[open] .body{animation:accIn .3s ease;}
+ @keyframes accIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
+ details.acc ol{margin:10px 0;padding-left:22px;}
+ details.acc li{margin:9px 0;color:var(--ink2);}
+ .note{background:var(--teal-tint);border:1px solid #A5CACE;border-radius:10px;
+     padding:12px 16px;font-size:14.5px;color:var(--teal-deep);margin:14px 0;}
+ footer{padding:48px 0 60px;color:var(--mut);font-size:14px;line-height:1.8;background:var(--paper2);}
+</style>
+</head>
+<body>
+<nav id="nav"><div class="wrap">
+ <span class="brand">Case <b>Agent</b></span>
+ <button class="burger" aria-label="Menu" onclick="document.getElementById('nav').classList.toggle('open')">
+  <span></span><span></span><span></span>
+ </button>
+ <div class="navlinks" onclick="document.getElementById('nav').classList.remove('open')">
+  <a href="#what">What it is</a><a href="#skills">The tools</a><a href="#install">Get started</a>
+  <a href="#standards">Standards &amp; safety</a><a href="#beats">Any beat</a><a href="#docs">Docs</a>
+ </div>
+</div></nav>
+
+<header>
+ <div class="parallax" data-parallax="0.10"></div>
+ <div class="watermark" data-parallax="-0.05">public records</div>
+ <div class="wrap">
+ <span class="tag">From a team at <a href="https://cronkite.asu.edu/">ASU's Walter Cronkite School</a></span>
+ <h1>Case <em>Agent</em></h1>
+ <p class="kicker">It works the case. People write the story.</p>
+ <p class="sub">A records-investigation toolkit for newsrooms that use AI coding agents.
+ It handles the slow parts — loading messy public records, connecting name variants to
+ real people and companies, finding outliers, tracking leads across weeks of sessions,
+ checking claims against the actual law, footnoting a draft to primary sources — while
+ keeping every number traceable to the record it came from.</p>
+ <p class="sub" style="font-size:16px;margin-top:10px"><b>One boundary is built in: the
+ agent does not write the story.</b> It does the records work and hands your reporter
+ material they can verify. News judgment, framing, and the writing stay with people.</p>
+ <div class="stats">
+  <div class="stat"><b>6 skills</b><span>use one, or the whole line</span></div>
+  <div class="stat"><b>100%</b><span>numbers trace to a source record</span></div>
+  <div class="stat"><b>$0</b><span>no servers, hosting, or accounts</span></div>
+  <div class="stat"><b>~15 sec</b><span>to index a year of federal filings</span></div>
+ </div>
+</div></header>
+
+<section id="what"><div class="wrap">
+ <p class="eyebrow">01 · The tool</p>
+ <h2>What it is</h2>
+ <p>Six Agent Skills that work as one pipeline, following the same four steps a careful
+ reporter would:</p>
+ <div class="flow">
+  <div class="flip"><div class="inner">
+   <div class="face"><b>1 · Scope the question</b><small>The agent interviews you: what's
+    the question, which entities, what time frame, what counts as a finding? That scope
+    becomes the case file's brief and picks the right tools for the beat.</small>
+    <span class="hint">Click for details +</span></div>
+   <div class="face back"><b>What's actually happening</b><ul>
+    <li>Your answers become two small files: a plain-English brief — the investigation's
+     charter — and a settings file that points the rest of the tools at your beat.</li>
+    <li>Lobbying comes pre-configured. Any other beat gets a starter plan built from
+     your answers: what to treat as an entity, where to look for outside data, what
+     counts as unusual.</li>
+    <li>If the data later suggests a bigger or smaller story, the agent asks again, and
+     the change is written down.</li></ul>
+    <span class="hint">Click to flip back</span></div>
+  </div></div>
+  <div class="flip"><div class="inner">
+   <div class="face"><b>2 · Gather &amp; analyze</b><small>Deterministic scripts load the
+    records into a database, resolve messy names to real entities, profile what's normal,
+    and surface what isn't — including searching the web for outside datasets and APIs to
+    check claims against.</small>
+    <span class="hint">Click for details +</span></div>
+   <div class="face back"><b>What's actually happening</b><ul>
+    <li>Scripts read the raw records once and organize them into a small database on
+     your computer — a year of federal lobbying filings takes about 15 seconds.</li>
+    <li>Name cleanup connects the variations — "Rep. Brett Guthrie," "GUTHRIE, BRETT,"
+     "Guthrie for Congress" — to the same real person, so the money adds up correctly.</li>
+    <li>A data-finder suggests public datasets and official sources for your topic, and
+     anything you pull in is saved with a digital fingerprint so it can be re-checked
+     later.</li></ul>
+    <span class="hint">Click to flip back</span></div>
+  </div></div>
+  <div class="flip"><div class="inner">
+   <div class="face"><b>3 · Stay organized</b><small>A case file on disk tracks every
+    thread (open, chasing, confirmed, or dead), every key entity, and a session journal —
+    so next week's session picks up exactly where this one stopped.</small>
+    <span class="hint">Click for details +</span></div>
+   <div class="face back"><b>What's actually happening</b><ul>
+    <li>The case file is a folder of ordinary text files — a brief, one file per lead,
+     a list of who matters, a diary of what happened each session. You can read or edit
+     any of it without special software.</li>
+    <li>Built-in rules keep it honest: a lead can't be marked confirmed without a source
+     record behind it, and a dead end has to say why it died.</li>
+    <li>One command turns the whole case file into a dashboard page an editor can open
+     in any browser.</li></ul>
+    <span class="hint">Click to flip back</span></div>
+  </div></div>
+  <div class="flip"><div class="inner">
+   <div class="face"><b>4 · Harden every claim</b><small>Before anything goes to an
+    editor: read the actual statute and apply it element-by-element, footnote the draft
+    to primary sources as tracked changes, and flag what still needs a human decision.
+    The tool prepares claims for review; publishing judgments belong to people.</small>
+    <span class="hint">Click for details +</span></div>
+   <div class="face back"><b>What's actually happening</b><ul>
+    <li>The legal checker quotes the actual statute and walks through it requirement by
+     requirement. The strongest thing it will ever say is "possible — ask a lawyer."</li>
+    <li>The footnoter attaches each claim in a draft to its source, as a tracked change
+     in Word — and where it can't find support, it says so in a margin note rather than
+     inventing one.</li>
+    <li>Any number, anywhere in the work, can be traced back to the exact government
+     filing it came from with one command.</li></ul>
+    <span class="hint">Click to flip back</span></div>
+  </div></div>
+ </div>
+ <p style="color:var(--ink2)">Underneath all four steps, one rule: <b>every number carries
+ a provenance ID</b> that traces back to the raw record it came from, so an editor can
+ audit any claim in one click.</p>
+</div></section>
+
+<section id="skills"><div class="wrap">
+ <p class="eyebrow">02 · The skills</p>
+ <h2>The tools</h2>
+ <p>An <a href="https://agentskills.io">Agent Skill</a> is a folder of instructions and
+ scripts that a coding agent (Claude Code, Cursor, Cowork) picks up automatically. Each
+ of the six works on its own; together they're the pipeline above. Get them by cloning
+ <a href="https://github.com/ewyloge-asu/case-agent-for-newsrooms">the repo</a> — each card links to its folder.</p>
+ <div class="grid">
+  <div class="card"><h3>Start here: the conductor</h3><p class="id">investigative-method</p>
+   <p>Interviews you to scope the investigation, opens the case file, and drives the other
+   five skills in order. Includes tools that find public datasets and official APIs for
+   any topic.</p>
+   <a class="dl alt" href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/tree/main/skills/investigative-method">View the skill</a></div>
+  <div class="card"><h3>Find the leads</h3><p class="id">lobbying-influence-mapper</p>
+   <p>The analysis engine, configured for money-in-politics records: loads filings into a
+   database, resolves messy names to real people and companies, ranks who's paying whom,
+   and checks it against outside records. The pattern generalizes to other beats.</p>
+   <a class="dl alt" href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/tree/main/skills/lobbying-influence-mapper">View the skill</a></div>
+  <div class="card"><h3>Understand any table</h3><p class="id">robodoig</p>
+   <p>Point it at any CSV or spreadsheet and get a profile: what the columns mean, what's
+   normal, what's missing, what correlates — before anyone trusts a number. Named for
+   Steve Doig, the Pulitzer-winning ASU data-journalism pioneer.</p>
+   <a class="dl alt" href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/tree/main/skills/robodoig">View the skill</a></div>
+  <div class="card"><h3>Never lose the thread</h3><p class="id">case-file</p>
+   <p>The investigation's memory: every lead's status, every key entity, a session
+   journal — plain text files your whole desk can read. Come back a week later and the
+   agent re-orients itself instead of starting over.</p>
+   <a class="dl alt" href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/tree/main/skills/case-file">View the skill</a></div>
+  <div class="card"><h3>Is it actually illegal?</h3><p class="id">checking-the-law</p>
+   <p>Takes a lead, pulls the real statute text, and applies it element-by-element —
+   never from memory. Its verdicts are deliberately cautious: "possible," "unclear, ask
+   a lawyer," or "not a violation, and here's why."</p>
+   <a class="dl alt" href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/tree/main/skills/checking-the-law">View the skill</a></div>
+  <div class="card"><h3>Source every claim</h3><p class="id">howard-center-footnoter</p>
+   <p>Reads a draft story, matches each factual claim to your reporting materials, and
+   inserts footnotes as Word tracked changes — with margin comments where no source
+   exists or a quote may be out of context.</p>
+   <a class="dl alt" href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/tree/main/skills/howard-center-footnoter">View the skill</a></div>
+ </div>
+</div></section>
+
+<section id="install"><div class="wrap">
+ <p class="eyebrow">03 · Fifteen minutes</p>
+ <h2>Get started</h2>
+ <p>You need <b>Python 3.9+</b> and either a code-executing AI agent or just a terminal.
+ Every skill ships a small demo dataset, so nothing else is required for a first run.
+ Full walkthrough: <a href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/docs/getting-started.md">getting-started.md</a>.</p>
+
+ <details class="acc" open><summary>Claude Code (desktop app or the <code>claude</code> CLI)</summary>
+  <div class="body"><ol>
+   <li>Clone the repo: <code>git clone https://github.com/ewyloge-asu/case-agent-for-newsrooms.git</code></li>
+   <li>Copy the skills in: <code>cp -r case-agent-for-newsrooms/skills/* ~/.claude/skills/</code><br>
+       (one project only: <code>.claude/skills/</code> inside that project instead)</li>
+   <li>Ask: <i>"Use the lobbying-influence-mapper skill on its demo data: ingest, resolve
+       entities, and show me the top recipients."</i> You should have a ranked, sourced
+       leaderboard in under a minute.</li>
+   <li>Then start yours: <i>"Use the investigative-method skill. I want to investigate
+       [your question] using [where your records live]."</i></li>
+  </ol></div>
+ </details>
+
+ <details class="acc"><summary>Claude Cowork</summary>
+  <div class="body"><ol>
+   <li>Clone or download the repo and add the folder to your Cowork workspace.</li>
+   <li>Cowork sessions with code execution can run every script. If your records live on
+       your machine, mention their path in your first message.</li>
+   <li>Ask: <i>"Read skills/investigative-method/SKILL.md and follow it to start an
+       investigation."</i></li>
+  </ol></div>
+ </details>
+
+ <details class="acc"><summary>Cursor &amp; other agents that support Agent Skills</summary>
+  <div class="body"><ol>
+   <li>Clone the repo and copy <code>skills/*</code> into your agent's skills directory
+       (Cursor: <code>~/.cursor/skills/</code>), or open the repo folder as part of your
+       workspace.</li>
+   <li>Any agent without skills support works with one instruction:
+       <i>"Read skills/investigative-method/SKILL.md and follow it."</i> The SKILL.md
+       files are the manual.</li>
+  </ol></div>
+ </details>
+
+ <details class="acc"><summary>No agent — plain terminal</summary>
+  <div class="body">
+   <p style="color:var(--ink2)">The deterministic pipeline runs by itself, on the bundled
+   demo data or your own records:</p>
+<pre><span class="cm"># demo data (bundled); point GAIN_DATA_DIR at your own records instead when ready</span>
+cd skills/lobbying-influence-mapper
+export GAIN_DATA_DIR=$PWD/demo_data GAIN_WORKDIR=/tmp/casework
+python3 scripts/ingest.py --years 2025 --datasets senate contributions press
+python3 scripts/resolve_entities.py
+python3 scripts/xref.py gatekeeper --filer lobbyist --year 2025 --top 10
+
+<span class="cm"># profile any table before trusting it (needs: pip install pandas numpy matplotlib openpyxl)</span>
+python3 ../robodoig/scripts/analyze.py your_table.csv /tmp/profile
+
+<span class="cm"># find public datasets and official APIs for any topic</span>
+python3 ../investigative-method/tools/find_data.py "your topic"</pre>
+  </div>
+ </details>
+</div></section>
+
+<section id="standards"><div class="wrap">
+ <p class="eyebrow">04 · Trust, mechanically</p>
+ <h2>Standards &amp; safety</h2>
+ <p>Two documents your editor and your counsel will want before this touches a story —
+ the short versions:</p>
+ <div class="grid">
+  <div class="card"><h3>Editorial standards</h3><p class="id">docs/editorial-standards.md</p>
+   <p>Why the no-story-writing boundary is a design decision; how every anti-hallucination
+   property is mechanical rather than promised: deterministic scripts do the math, the
+   footnoter flags instead of filling, the legal checker cannot say "illegal," and a lead
+   can't be marked confirmed without a source record attached.</p>
+   <a class="dl" href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/docs/editorial-standards.md">Read the standard</a></div>
+  <div class="card"><h3>Data &amp; source protection</h3><p class="id">docs/data-and-source-protection.md</p>
+   <p>Everything the scripts do stays on your machines — no server, no account. What
+   leaves: whatever your AI agent reads goes to its model provider. The rules we'd set:
+   public records freely; confidential source material away from cloud agents unless
+   your org has real zero-retention terms.</p>
+   <a class="dl" href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/docs/data-and-source-protection.md">Read the guidance</a></div>
+  <div class="card"><h3>Newsroom workflow</h3><p class="id">docs/newsroom-workflow.md</p>
+   <p>Who touches what: the reporter drives in chat, the editor reads a generated
+   dashboard, counsel gets element-by-element legal memos, the fact-checker gets the
+   footnoted draft. Plus what a realistic first project looks like.</p>
+   <a class="dl" href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/docs/newsroom-workflow.md">Read the workflow</a></div>
+ </div>
+</div></section>
+
+<section id="beats"><div class="wrap">
+ <p class="eyebrow">05 · Generality</p>
+ <h2>Any beat with records</h2>
+ <p>The method — scope, ingest, profile, find what deviates, track it, harden it — is not
+ tied to one dataset. The scoping step builds a starter plan for whatever beat you name,
+ the data-finder locates public sources for it, and the profiler takes any table. We've
+ exercised the full loop on federal lobbying records and on Medicare hospital billing
+ data; procurement and contracts are the natural next beats. Where this is going, and
+ how to bend it toward your beat today:
+ <a href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/docs/roadmap.md">the roadmap</a>.</p>
+</div></section>
+
+<section id="docs"><div class="wrap">
+ <p class="eyebrow">06 · The documentation</p>
+ <h2>Docs</h2>
+ <table>
+  <tr><th>Guide</th><th>Read it when</th></tr>
+  <tr><td><a href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/docs/getting-started.md">Getting started</a></td><td>You're installing it — 15 minutes to a first result</td></tr>
+  <tr><td><a href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/docs/editorial-standards.md">Editorial standards</a></td><td>Your editor asks "how do we know the AI didn't make this up?"</td></tr>
+  <tr><td><a href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/docs/data-and-source-protection.md">Data &amp; source protection</a></td><td>Before pointing it at anything sensitive</td></tr>
+  <tr><td><a href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/docs/newsroom-workflow.md">Newsroom workflow</a></td><td>You're fitting it into a desk with reporters, editors, and counsel</td></tr>
+  <tr><td><a href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/docs/roadmap.md">Roadmap</a></td><td>You want to adapt it to your beat, or contribute</td></tr>
+  <tr><td><a href="https://github.com/ewyloge-asu/case-agent-for-newsrooms/blob/main/data-setup.md">Data setup</a></td><td>You're pointing it at your own records</td></tr>
+ </table>
+</div></section>
+
+<footer><div class="wrap">
+ <b style="color:var(--ink)">Case Agent</b> · built by a team at
+ <a href="https://cronkite.asu.edu/">ASU's Walter Cronkite School</a> — Evan (analysis
+ engine), Steve (data profiler &amp; QA), Mitul (legal checker), Allie &amp; Katie (case
+ file), Shelby (footnoter) · MIT license ·
+ <a href="https://github.com/ewyloge-asu/case-agent-for-newsrooms">GitHub</a> ·
+ originally built for Northwestern's GAIN Agentic Investigation Challenge
+ (<a href="https://ewyloge-asu.github.io/gain-agent-challenge/">the original project</a>)
+</div></footer>
+
+<script>
+// Flip cards: click toggles; clicks on links inside pass through untouched.
+document.querySelectorAll('.flip').forEach(function (card) {
+  card.addEventListener('click', function (e) {
+    if (e.target.closest('a')) return;
+    card.classList.toggle('flipped');
+  });
+});
+// Barely-perceptible parallax on the hero layers (rate set per element).
+(function () {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var els = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));
+  if (!els.length) return;
+  var ticking = false;
+  function frame() {
+    var y = window.scrollY;
+    els.forEach(function (el) {
+      el.style.transform = 'translateY(' + (y * parseFloat(el.dataset.parallax)) + 'px)';
+    });
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) { requestAnimationFrame(frame); ticking = true; }
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>
