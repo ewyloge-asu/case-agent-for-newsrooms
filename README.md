@@ -58,7 +58,7 @@ Install and first run: **[docs/getting-started.md](docs/getting-started.md)** �
 
 ## Provenance & license
 
-Built by a team at ASU's Walter Cronkite School — Evan (analysis engine), Steve (data
+Built by a team at Arizona State University — Evan (analysis engine), Steve (data
 profiler & QA), Mitul (legal checker), Allie & Katie (case file), Shelby (footnoter).
 The toolkit was developed and exercised on a complete federal-lobbying investigation
 and a second run on Medicare hospital billing data; those materials live with the
