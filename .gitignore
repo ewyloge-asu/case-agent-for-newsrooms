@@ -1,0 +1,5 @@
+workdir/
+credentials.env
+__pycache__/
+.DS_Store
+*.pyc
