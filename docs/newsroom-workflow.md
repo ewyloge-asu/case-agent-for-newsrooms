@@ -1,6 +1,6 @@
 # Fitting it into a newsroom
 
-Case Agent has three surfaces, and they map onto a desk the way you'd hope.
+Agent of Record has three surfaces, and they map onto a desk the way you'd hope.
 
 ## Who touches what
 

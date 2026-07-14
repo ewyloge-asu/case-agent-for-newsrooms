@@ -1,10 +1,10 @@
-# Case Agent
+# Agent of Record
 
 **A records-investigation toolkit for newsrooms that use AI coding agents.**
-Built by a team at Arizona State University. ·
+Built at the Walter Cronkite School of Journalism and Mass Communication, Arizona State University. ·
 **Site:** https://ewyloge-asu.github.io/case-agent-for-newsrooms/
 
-Case Agent lets an AI agent do the slow parts of a records investigation — loading
+Agent of Record lets an AI agent do the slow parts of a records investigation — loading
 messy public records, connecting name variants to real people and companies, finding
 outliers, tracking leads across weeks of sessions, checking claims against the actual
 law, and footnoting a draft to primary sources — while keeping every number traceable
@@ -17,7 +17,7 @@ writing stay with people. (Our view of where that line sits, and why, is in
 
 ## Is this for you?
 
-You'll get value from Case Agent if:
+You'll get value from Agent of Record if:
 
 - your newsroom already uses (or is piloting) a code-executing AI agent — Claude Code,
   Cursor, or Cowork;
@@ -58,8 +58,9 @@ Install and first run: **[docs/getting-started.md](docs/getting-started.md)** �
 
 ## Provenance & license
 
-Built by a team at Arizona State University — Evan (analysis engine), Steve (data
-profiler & QA), Mitul (legal checker), Allie & Katie (case file), Shelby (footnoter).
+Built at the Walter Cronkite School of Journalism and Mass Communication, Arizona State
+University, by Evan Wyloge, Shelby Grossman, Katie Wilcox, Allie Seligman, Stephen K.
+Doig, Brett Kurland, DeAnna Soth, and Mitul Balamurugan.
 The toolkit was developed and exercised on a complete federal-lobbying investigation
 and a second run on Medicare hospital billing data; those materials live with the
 original project, not in this repo. This edition is maintained for working newsrooms.
